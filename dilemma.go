@@ -6,6 +6,8 @@ import (
 	"os"
 
 	"golang.org/x/crypto/ssh/terminal"
+	figures "github.com/geeks-dev/go-figures"
+	"github.com/fatih/color"
 )
 
 const (
@@ -135,18 +137,15 @@ func Prompt(config Config) (string, Key, error) {
 	go inputLoop(keyPresses, exitAck)
 
 	var selectionIndex int
-
+	c := color.New(color.FgCyan)
 	draw := func(help helpStatus) {
 		fmt.Println(config.Title)
 		fmt.Print("\r")
 		for i, v := range config.Options {
-			fmt.Print("  ")
 			if i == selectionIndex {
-				invertColours()
-			}
-			fmt.Printf("%s\n", v)
-			if i == selectionIndex {
-				resetStyle()
+				c.Printf("%s %s\n",figures.Get("pointer"),v)
+			}else{
+				fmt.Print("  "+v+"\n")
 			}
 			fmt.Print("\r")
 		}
