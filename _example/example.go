@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/robbiev/dilemma"
+	"github.com/geeks-dev/dilemma"
 )
 
 func main() {
@@ -11,9 +11,27 @@ func main() {
 
 	{
 		s := dilemma.Config{
-			Title:   "Hello there!\n\rSelect a treat using the arrow keys:",
-			Help:    "Use arrow up and down, then enter to select.\n\rChoose wisely.",
-			Options: []string{"waffles", "ice cream", "candy", "biscuits"},
+			Title: "Hello there!\n\rSelect a treat using the arrow keys:",
+			Help:  "Use arrow up and down, then enter to select.\n\rChoose wisely.",
+			Options: []map[string]string{
+				{
+					"name":  "waffles",
+					"price": "$2",
+				},
+				{
+					"name":  "ice cream",
+					"price": "$1",
+				},
+				{
+					"name":  "candy",
+					"price": "$1",
+				},
+				{
+					"name":  "biscuits",
+					"price": "$1",
+				},
+			},
+			Key: "name",
 		}
 		selected, exitKey, err := dilemma.Prompt(s)
 		if err != nil || exitKey == dilemma.CtrlC {
@@ -28,9 +46,35 @@ func main() {
 
 	{
 		s := dilemma.Config{
-			Title:   "Select a companion using the arrow keys:",
-			Help:    "Use arrow up and down, then enter to select.",
-			Options: []string{"dog", "pony", "cat", "rabbit", "gopher", "elephant"},
+			Title: "Do what color do you see?",
+			Help:  "Use arrow up and down, then enter to select.",
+			Options: []map[string]string{
+				{
+					"name":  "dog",
+					"color": "black",
+				},
+				{
+					"name":  "pony",
+					"color": "brown",
+				},
+				{
+					"name":  "cat",
+					"color": "yellow",
+				},
+				{
+					"name":  "rabbit",
+					"color": "white",
+				},
+				{
+					"name":  "gopher",
+					"color": "light blue",
+				},
+				{
+					"name":  "elephant",
+					"color": "gray",
+				},
+			},
+			Key: "color",
 		}
 		selected, exitKey, err := dilemma.Prompt(s)
 		if err != nil || exitKey == dilemma.CtrlC {
@@ -38,7 +82,7 @@ func main() {
 			return
 		}
 
-		fmt.Printf("Enjoy your %s!\n", selected)
+		fmt.Printf("It %s!\n", selected["name"])
 	}
 
 	fmt.Println()
