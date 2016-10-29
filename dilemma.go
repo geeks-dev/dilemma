@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"os"
 
-	"golang.org/x/crypto/ssh/terminal"
-	figures "github.com/geeks-dev/go-figures"
 	"github.com/fatih/color"
+	figures "github.com/geeks-dev/go-figures"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 const (
@@ -47,7 +47,8 @@ type helpStatus int
 // for a user to select.
 type Config struct {
 	Title   string
-	Options []string
+	Options []map[string]string
+	Key     string
 	Help    string
 }
 
@@ -116,10 +117,11 @@ func inputLoop(keyPresses chan<- input, exitAck chan exitStatus) {
 // is returned in the first return value. The second return value is set to
 // Empty unless the user presses CTRL-C (indicating she wants to signal SIGINT)
 // in which case the value will be CtrlC.
-func Prompt(config Config) (string, Key, error) {
+func Prompt(config Config) (map[string]string, Key, error) {
+
 	oldState, err := terminal.MakeRaw(0)
 	if err != nil {
-		return "", Empty, err
+		return nil, Empty, err
 	}
 	defer terminal.Restore(0, oldState)
 
@@ -143,9 +145,9 @@ func Prompt(config Config) (string, Key, error) {
 		fmt.Print("\r")
 		for i, v := range config.Options {
 			if i == selectionIndex {
-				c.Printf("%s %s\n",figures.Get("pointer"),v)
-			}else{
-				fmt.Print("  "+v+"\n")
+				c.Printf("%s %s\n", figures.Get("pointer"), v[config.Key])
+			} else {
+				fmt.Print("  " + v[config.Key] + "\n")
 			}
 			fmt.Print("\r")
 		}
@@ -186,7 +188,7 @@ func Prompt(config Config) (string, Key, error) {
 		input := <-keyPresses
 		if input.err != nil {
 			redraw(helpNo) // to clear help
-			return "", Empty, input.err
+			return nil, Empty, input.err
 		}
 		switch input.key {
 		case enter:
@@ -196,7 +198,7 @@ func Prompt(config Config) (string, Key, error) {
 		case CtrlC:
 			exitAck <- exitYes
 			redraw(helpNo) // to clear help
-			return "", CtrlC, nil
+			return nil, CtrlC, nil
 		case up:
 			selectionIndex = ((selectionIndex - 1) + len(config.Options)) % len(config.Options)
 			redraw(helpNo)
