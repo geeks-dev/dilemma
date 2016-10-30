@@ -3,11 +3,11 @@ package dilemma
 
 import (
 	"fmt"
-	"os"
-
 	"github.com/fatih/color"
 	figures "github.com/geeks-dev/go-figures"
 	"golang.org/x/crypto/ssh/terminal"
+	"os"
+	"reflect"
 )
 
 const (
@@ -47,7 +47,7 @@ type helpStatus int
 // for a user to select.
 type Config struct {
 	Title   string
-	Options []map[string]string
+	Options interface{}
 	Key     string
 	Help    string
 }
@@ -117,11 +117,12 @@ func inputLoop(keyPresses chan<- input, exitAck chan exitStatus) {
 // is returned in the first return value. The second return value is set to
 // Empty unless the user presses CTRL-C (indicating she wants to signal SIGINT)
 // in which case the value will be CtrlC.
-func Prompt(config Config) (map[string]string, Key, error) {
+func Prompt(config Config) (int, Key, error) {
+	length := reflect.ValueOf(config.Options).Len()
 
 	oldState, err := terminal.MakeRaw(0)
 	if err != nil {
-		return nil, Empty, err
+		return -1, Empty, err
 	}
 	defer terminal.Restore(0, oldState)
 
@@ -142,12 +143,14 @@ func Prompt(config Config) (map[string]string, Key, error) {
 	c := color.New(color.FgCyan)
 	draw := func(help helpStatus) {
 		fmt.Println(config.Title)
+
 		fmt.Print("\r")
-		for i, v := range config.Options {
+		for i := 0; i < length; i++ {
+			v := reflect.ValueOf(config.Options).Index(i).FieldByName(config.Key).String()
 			if i == selectionIndex {
-				c.Printf("%s %s\n", figures.Get("pointer"), v[config.Key])
+				c.Printf("%s %s\n", figures.Get("pointer"), v)
 			} else {
-				fmt.Print("  " + v[config.Key] + "\n")
+				fmt.Print("  " + v + "\n")
 			}
 			fmt.Print("\r")
 		}
@@ -157,7 +160,7 @@ func Prompt(config Config) (map[string]string, Key, error) {
 	}
 
 	clear := func(help helpStatus) {
-		lines := lineCount(config.Title) + len(config.Options)
+		lines := lineCount(config.Title) + length
 
 		if help == helpYes {
 			lines = lines + lineCount(config.Help)
@@ -188,22 +191,22 @@ func Prompt(config Config) (map[string]string, Key, error) {
 		input := <-keyPresses
 		if input.err != nil {
 			redraw(helpNo) // to clear help
-			return nil, Empty, input.err
+			return -1, Empty, input.err
 		}
 		switch input.key {
 		case enter:
 			exitAck <- exitYes
 			redraw(helpNo) // to clear help
-			return config.Options[selectionIndex], Empty, nil
+			return selectionIndex, Empty, nil
 		case CtrlC:
 			exitAck <- exitYes
 			redraw(helpNo) // to clear help
-			return nil, CtrlC, nil
+			return -1, CtrlC, nil
 		case up:
-			selectionIndex = ((selectionIndex - 1) + len(config.Options)) % len(config.Options)
+			selectionIndex = ((selectionIndex - 1) + length) % length
 			redraw(helpNo)
 		case down:
-			selectionIndex = ((selectionIndex + 1) + len(config.Options)) % len(config.Options)
+			selectionIndex = ((selectionIndex + 1) + length) % length
 			redraw(helpNo)
 		case Empty:
 			redraw(helpYes)
