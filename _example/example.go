@@ -6,32 +6,38 @@ import (
 	"github.com/geeks-dev/dilemma"
 )
 
+type Sweets struct {
+	Name  string
+	Price string
+}
+
 func main() {
 	fmt.Println()
 
 	{
-		s := dilemma.Config{
-			Title: "Hello there!\n\rSelect a treat using the arrow keys:",
-			Help:  "Use arrow up and down, then enter to select.\n\rChoose wisely.",
-			Options: []map[string]string{
-				{
-					"name":  "waffles",
-					"price": "$2",
-				},
-				{
-					"name":  "ice cream",
-					"price": "$1",
-				},
-				{
-					"name":  "candy",
-					"price": "$1",
-				},
-				{
-					"name":  "biscuits",
-					"price": "$1",
-				},
+		sweets := []Sweets{
+			Sweets{
+				Name:  "waffles",
+				Price: "$2",
 			},
-			Key: "name",
+			Sweets{
+				Name:  "ice cream",
+				Price: "$1",
+			},
+			Sweets{
+				Name:  "candy",
+				Price: "$1",
+			},
+			Sweets{
+				Name:  "biscuits",
+				Price: "$1",
+			},
+		}
+		s := dilemma.Config{
+			Title:   "Hello there!\n\rSelect a treat using the arrow keys:",
+			Help:    "Use arrow up and down, then enter to select.\n\rChoose wisely.",
+			Options: sweets,
+			Key:     "Name",
 		}
 		selected, exitKey, err := dilemma.Prompt(s)
 		if err != nil || exitKey == dilemma.CtrlC {
@@ -39,42 +45,48 @@ func main() {
 			return
 		}
 
-		fmt.Printf("Enjoy your %s!\n", selected)
+		fmt.Printf("Enjoy your %s!\n", sweets[selected].Price)
 	}
 
 	fmt.Println()
 
 	{
-		s := dilemma.Config{
-			Title: "Do what color do you see?",
-			Help:  "Use arrow up and down, then enter to select.",
-			Options: []map[string]string{
-				{
-					"name":  "dog",
-					"color": "black",
-				},
-				{
-					"name":  "pony",
-					"color": "brown",
-				},
-				{
-					"name":  "cat",
-					"color": "yellow",
-				},
-				{
-					"name":  "rabbit",
-					"color": "white",
-				},
-				{
-					"name":  "gopher",
-					"color": "light blue",
-				},
-				{
-					"name":  "elephant",
-					"color": "gray",
-				},
+		type Animal struct {
+			Name  string
+			Color string
+		}
+		animals := []Animal{
+			Animal{
+				Name:  "dog",
+				Color: "black",
 			},
-			Key: "color",
+			Animal{
+				Name:  "pony",
+				Color: "brown",
+			},
+			Animal{
+				Name:  "cat",
+				Color: "yellow",
+			},
+			Animal{
+				Name:  "rabbit",
+				Color: "white",
+			},
+			Animal{
+				Name:  "gopher",
+				Color: "light blue",
+			},
+			Animal{
+				Name:  "elephant",
+				Color: "gray",
+			},
+		}
+
+		s := dilemma.Config{
+			Title:   "Do what color do you see?",
+			Help:    "Use arrow up and down, then enter to select.",
+			Options: animals,
+			Key:     "Color",
 		}
 		selected, exitKey, err := dilemma.Prompt(s)
 		if err != nil || exitKey == dilemma.CtrlC {
@@ -82,7 +94,7 @@ func main() {
 			return
 		}
 
-		fmt.Printf("It %s!\n", selected["name"])
+		fmt.Printf("It %s!\n", animals[selected].Name)
 	}
 
 	fmt.Println()
